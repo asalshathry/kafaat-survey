@@ -1,0 +1,1064 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>رحلة تدوين حكاية كفاءات</title>
+<style>
+:root{
+  --paper:#F3EFE7; --paper2:#EDE7DB; --ink:#25211C; --ink2:#5A5348;
+  --maroon:#7A1F1F; --maroon2:#5E1717; --gold:#A8802F; --gold2:#C49A3F;
+  --olive:#6B5636; --orange:#B4661F; --card:#FBF9F4; --line:#DDD4C3;
+  --green:#3E6B3A;
+}
+*{box-sizing:border-box; margin:0; padding:0;}
+html{scroll-behavior:smooth;}
+body{
+  font-family:'Sakkal Majalla','Segoe UI',Tahoma,'Arial',sans-serif;
+  background:var(--paper); color:var(--ink); font-size:19px; line-height:1.7;
+  min-height:100vh;
+}
+button{font-family:inherit; cursor:pointer;}
+input,textarea,select{font-family:inherit; font-size:18px; color:var(--ink);}
+
+/* ===== شاشة البداية ===== */
+#intro, #picker{
+  min-height:100vh; display:flex; align-items:center; justify-content:center; padding:24px;
+  position:relative; overflow:hidden;
+}
+#intro{background:linear-gradient(155deg,#211E1A 0%,#2B2620 55%,#1B1816 100%); color:#F3EFE7;}
+#intro::after{
+  content:""; position:absolute; inset:auto -10% -35% -10%; height:60%;
+  border-radius:50% 50% 0 0; border-top:2px solid rgba(196,154,63,.25); transform:rotate(-3deg);
+}
+.quill{position:absolute; top:6%; left:8%; font-size:120px; opacity:.08; transform:rotate(-15deg);}
+.intro-box{max-width:660px; text-align:center; position:relative; z-index:2;}
+.eyebrow{color:var(--gold2); letter-spacing:1px; font-size:20px; margin-bottom:6px;}
+.intro-box h1{font-size:44px; line-height:1.3; margin-bottom:14px; font-weight:800;}
+.intro-box h1 span{color:var(--gold2);}
+.intro-box p{color:#D8D2C6; font-size:19px; margin-bottom:10px;}
+.intro-meta{display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin:18px 0 26px;}
+.pill{border:1px solid rgba(196,154,63,.5); color:#E8DFC9; border-radius:999px; padding:5px 16px; font-size:16px;}
+.who{background:rgba(255,255,255,.06); border:1px solid rgba(196,154,63,.35); border-radius:14px; padding:18px; margin-bottom:20px; text-align:right;}
+.who label{display:block; font-size:16px; color:var(--gold2); margin-bottom:4px;}
+.who input{width:100%; background:rgba(0,0,0,.25); border:1px solid rgba(255,255,255,.15); border-radius:8px; padding:9px 12px; color:#F3EFE7; margin-bottom:10px;}
+.who input:focus{outline:2px solid var(--gold2);}
+.role-chips{display:flex; flex-wrap:wrap; gap:7px; margin-bottom:4px;}
+.role-chips .chip{background:rgba(0,0,0,.25); border:1.4px solid rgba(255,255,255,.2); color:#E8DFC9;}
+.role-chips .chip.sel{background:var(--gold); border-color:var(--gold); color:#241E12; font-weight:700;}
+.btn-main{
+  background:linear-gradient(135deg,var(--gold2),var(--gold)); color:#241E12;
+  border:none; border-radius:999px; padding:13px 42px; font-size:21px; font-weight:800;
+  box-shadow:0 6px 18px rgba(0,0,0,.35); transition:transform .15s;
+}
+.btn-main:hover{transform:translateY(-2px);}
+.btn-main:focus-visible{outline:3px solid #fff;}
+
+/* ===== شاشة اختيار المجالات ===== */
+#picker{display:none; background:var(--paper);}
+.picker-box{max-width:720px; width:100%;}
+.picker-box h2{color:var(--maroon); font-size:30px; text-align:center; margin-bottom:6px;}
+.picker-box>p{text-align:center; color:var(--ink2); margin-bottom:20px;}
+.sec-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(210px,1fr)); gap:12px; margin-bottom:22px;}
+.sec-card{
+  background:var(--card); border:2px solid var(--line); border-radius:14px; padding:14px;
+  text-align:right; transition:all .15s; position:relative;
+}
+.sec-card:hover{border-color:var(--gold);}
+.sec-card.sel{border-color:var(--maroon); background:#fff; box-shadow:0 4px 12px rgba(122,31,31,.1);}
+.sec-card.sel::after{content:"✓"; position:absolute; top:8px; left:12px; color:var(--maroon); font-weight:800; font-size:20px;}
+.sec-card .si{font-size:26px;}
+.sec-card .sn{font-weight:800; font-size:17px; margin:2px 0;}
+.sec-card .sd{font-size:13.5px; color:var(--ink2); line-height:1.5;}
+.sec-card .sq{display:inline-block; margin-top:6px; font-size:12.5px; background:var(--paper2); border-radius:8px; padding:1px 8px; color:var(--olive);}
+.sec-card.rec .sn::after{content:" · موصى به للجميع"; color:var(--green); font-size:12.5px; font-weight:700;}
+.picker-actions{text-align:center;}
+.picker-actions .hintline{font-size:15px; color:var(--ink2); margin-top:8px;}
+.link-all{background:none; border:none; color:var(--gold); text-decoration:underline; font-size:16px; margin-top:10px;}
+
+/* ===== الإطار العام ===== */
+#app{display:none; max-width:820px; margin:0 auto; padding:0 16px 80px;}
+header.hud{
+  position:sticky; top:0; z-index:50; background:var(--paper);
+  padding:12px 0 10px; border-bottom:1px solid var(--line);
+}
+.hud-top{display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;}
+.score{display:flex; align-items:center; gap:14px; flex-wrap:wrap;}
+.impact{
+  background:var(--green); color:#F3F7EF; border-radius:999px; padding:4px 16px;
+  font-weight:800; font-size:17px; display:flex; gap:6px; align-items:center; transition:transform .2s;
+}
+.impact.bump{transform:scale(1.15);}
+.rank{font-size:15px; color:var(--olive); font-weight:700;}
+.journey{
+  display:flex; align-items:flex-start; justify-content:flex-start; gap:0; margin-top:12px;
+  overflow-x:auto; padding-bottom:6px; scrollbar-width:thin;
+}
+.diamond-wrap{display:flex; flex-direction:column; align-items:center; min-width:74px; flex:0 0 auto;}
+.diamond{
+  width:30px; height:30px; transform:rotate(45deg); border-radius:5px;
+  background:var(--paper2); border:2px solid var(--line);
+  display:flex; align-items:center; justify-content:center; transition:all .3s;
+}
+.diamond span{transform:rotate(-45deg); font-size:13px; font-weight:800; color:var(--ink2);}
+.diamond-wrap small{margin-top:9px; font-size:11.5px; color:var(--ink2); text-align:center; line-height:1.3; max-width:80px;}
+.diamond-wrap.done .diamond{background:var(--gold); border-color:var(--gold);}
+.diamond-wrap.done .diamond span{color:#fff;}
+.diamond-wrap.active .diamond{background:var(--maroon); border-color:var(--maroon); box-shadow:0 0 0 4px rgba(122,31,31,.15);}
+.diamond-wrap.active .diamond span{color:#fff;}
+.connector{height:2px; width:18px; background:var(--line); margin-top:15px; flex:0 0 auto;}
+.progressbar{height:6px; background:var(--paper2); border-radius:99px; margin-top:10px; overflow:hidden;}
+.progressbar div{height:100%; width:0%; background:linear-gradient(90deg,var(--maroon),var(--gold)); transition:width .4s;}
+
+/* ===== بطاقة السؤال ===== */
+.qcard{
+  background:var(--card); border:1px solid var(--line); border-radius:18px;
+  padding:26px 24px; margin-top:22px; box-shadow:0 4px 14px rgba(60,45,20,.06);
+  animation:fadeUp .35s ease;
+}
+@keyframes fadeUp{from{opacity:0; transform:translateY(14px);} to{opacity:1; transform:none;}}
+.q-eyebrow{color:var(--gold); font-size:15px; font-weight:800; letter-spacing:.5px; margin-bottom:4px;}
+.q-title{font-size:23px; font-weight:800; line-height:1.5; margin-bottom:4px;}
+.q-hint{color:var(--ink2); font-size:16px; margin-bottom:12px;}
+.multi-note{display:inline-block; background:var(--paper2); color:var(--olive); border-radius:8px; padding:2px 10px; font-size:14px; margin-bottom:10px;}
+.part{margin-top:16px;}
+.part-label{font-size:17px; font-weight:700; color:var(--maroon); margin-bottom:8px;}
+
+.chips{display:flex; flex-wrap:wrap; gap:9px;}
+.chip{
+  border:1.6px solid var(--line); background:#fff; border-radius:12px;
+  padding:9px 16px; font-size:16.5px; transition:all .12s; color:var(--ink);
+}
+.chip:hover{border-color:var(--gold);}
+.chip:focus-visible{outline:3px solid var(--gold);}
+.chip.sel{background:var(--maroon); border-color:var(--maroon); color:#fff; font-weight:700;}
+.chip.small{padding:6px 12px; font-size:15px;}
+textarea.opt{
+  width:100%; border:1.5px dashed var(--line); border-radius:10px; padding:10px 12px;
+  background:#fff; min-height:64px; resize:vertical;
+}
+textarea.opt:focus{outline:2px solid var(--gold); border-style:solid;}
+.opt-note{font-size:14px; color:var(--ink2); margin-top:4px;}
+
+.matrix{display:flex; flex-direction:column; gap:10px;}
+.mrow{background:#fff; border:1px solid var(--line); border-radius:12px; padding:10px 14px;}
+.mrow .mname{font-weight:700; margin-bottom:6px; font-size:16.5px;}
+.seg{display:flex; flex-wrap:wrap; gap:6px;}
+.seg .chip{font-size:14.5px; padding:5px 11px;}
+
+.person-row{display:flex; gap:8px; flex-wrap:wrap; align-items:center; background:#fff; border:1px solid var(--line); border-radius:12px; padding:10px; margin-bottom:8px;}
+.person-row input{flex:1; min-width:160px; border:1px solid var(--line); border-radius:8px; padding:7px 10px;}
+.add-person{background:none; border:1.5px dashed var(--gold); color:var(--gold); border-radius:10px; padding:7px 16px; font-weight:700;}
+
+.nav{display:flex; justify-content:space-between; align-items:center; margin-top:24px; gap:10px;}
+.btn-next{
+  background:var(--maroon); color:#fff; border:none; border-radius:999px;
+  padding:11px 36px; font-size:19px; font-weight:800; transition:transform .12s, background .2s;
+}
+.btn-next:hover{transform:translateY(-2px); background:var(--maroon2);}
+.btn-skip{background:none; border:none; color:var(--ink2); font-size:16px; text-decoration:underline;}
+.btn-back{background:none; border:1.5px solid var(--line); border-radius:999px; padding:9px 20px; font-size:16px; color:var(--ink2);}
+.btn-back:disabled{opacity:.4; cursor:not-allowed;}
+.counter{font-size:15px; color:var(--ink2);}
+.btn-home{
+  background:#fff; border:1.5px solid var(--gold); color:var(--gold);
+  border-radius:999px; padding:6px 16px; font-size:15px; font-weight:700; transition:all .15s;
+}
+.btn-home:hover{background:var(--gold); color:#fff;}
+
+.overlay{
+  position:fixed; inset:0; background:rgba(30,25,20,.55); display:flex;
+  align-items:center; justify-content:center; z-index:100; padding:20px;
+}
+.level-done{
+  background:var(--card); border-radius:22px; max-width:470px; width:100%;
+  padding:38px 30px; text-align:center; border-top:6px solid var(--gold);
+  animation:pop .35s ease;
+}
+@keyframes pop{from{transform:scale(.85); opacity:0;} to{transform:scale(1); opacity:1;}}
+.badge-big{font-size:64px; margin-bottom:8px;}
+.level-done h2{color:var(--maroon); font-size:26px; margin-bottom:6px;}
+.level-done p{color:var(--ink2); margin-bottom:18px;}
+.bonus-pts{color:var(--green); font-weight:800; font-size:20px; margin-bottom:14px;}
+
+.final{background:var(--card); border:1px solid var(--line); border-radius:20px; padding:34px 26px; margin-top:24px; text-align:center;}
+.final h2{color:var(--maroon); font-size:30px; margin-bottom:6px;}
+.badges-row{display:flex; justify-content:center; gap:14px; flex-wrap:wrap; margin:16px 0;}
+.badge-card{background:#fff; border:1px solid var(--line); border-radius:14px; padding:12px 14px; width:112px;}
+.badge-card .em{font-size:32px;}
+.badge-card small{display:block; font-size:12.5px; color:var(--ink2); line-height:1.4;}
+.final .btn-main{margin:6px;}
+.export-box{background:#fff; border:1px solid var(--line); border-radius:12px; padding:14px; margin-top:18px; text-align:right; max-height:260px; overflow:auto; white-space:pre-wrap; font-size:15px; color:var(--ink2); display:none;}
+
+.confetti{position:fixed; top:-12px; z-index:200; font-size:20px; animation:fall linear forwards; pointer-events:none;}
+@keyframes fall{to{transform:translateY(110vh) rotate(540deg); opacity:.7;}}
+
+@media (prefers-reduced-motion: reduce){ *{animation:none !important; transition:none !important;} }
+@media (max-width:560px){
+  .intro-box h1{font-size:32px;}
+  .q-title{font-size:20px;}
+}
+</style>
+</head>
+<body>
+
+<!-- ===== شاشة البداية ===== -->
+<section id="intro">
+  <div class="quill">🪶</div>
+  <div class="intro-box">
+    <div class="eyebrow">مشروع توثيق سردية كفاءات الماجد · مجتمع الكتابة</div>
+    <h1>حكاية كفاءات..<br><span>بقلمكم تكتمل</span></h1>
+    <p>نكتب الآن كتاب رحلة مؤسستكم المباركة، وهذه الرحلة تجمع منكم — قيادات المؤسسة — ما لا يعرفه سواكم، بأسلوب ميسّر: <b>الإجابات بالنقر، وتعدد الاختيار متاح في كل سؤال</b>، والكتابة اختيارية دائماً.</p>
+    <div class="intro-meta">
+      <span class="pill">🎯 تختارون المجالات الأقرب لاطلاعكم</span>
+      <span class="pill">🌿 كل إجابة تُنمّي رصيد الأثر</span>
+    </div>
+    <div class="who">
+      <label for="repName">الاسم الكريم</label>
+      <input id="repName" type="text" placeholder="الاسم الثلاثي">
+      <label>الصفة في المؤسسة</label>
+      <div class="role-chips" id="roleChips"></div>
+      <input id="repRole" type="text" placeholder="أو اكتبوها هنا" style="margin-top:8px">
+    </div>
+    <button class="btn-main" onclick="goPicker()">🪶 التالي: اختيار المجالات</button>
+  </div>
+</section>
+
+<!-- ===== شاشة اختيار المجالات ===== -->
+<section id="picker">
+  <div class="picker-box">
+    <h2>ما المجالات الأقرب لاطلاعكم؟</h2>
+    <p>اختاروا مجالاً واحداً أو أكثر — ستُعرض عليكم أسئلة ما اخترتم فقط، وكل مجال يمنح وساماً عند إتمامه.</p>
+    <div class="sec-grid" id="secGrid"></div>
+    <div class="picker-actions">
+      <button class="link-all" onclick="selectAllSections()">اختيار كل المجالات</button>
+      <br>
+      <button class="btn-main" id="startBtn" style="margin-top:10px" onclick="startJourney()">🌿 ابدأ رحلة التدوين</button>
+      <div class="hintline">يمكنكم الاكتفاء بمجالٍ واحد؛ فكل قائد يكمل جزءاً من الحكاية.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== التطبيق ===== -->
+<div id="app">
+  <header class="hud">
+    <div class="hud-top">
+      <div class="score">
+        <div class="impact" id="impactBox">🌿 <span id="pts">0</span> نقطة أثر</div>
+        <div class="rank" id="rank">بذرةُ أثرٍ أولى</div>
+      </div>
+      <div style="display:flex; align-items:center; gap:12px;">
+        <div class="counter" id="qCounter"></div>
+        <button type="button" class="btn-home" onclick="backToPicker()">☰ القائمة الرئيسية</button>
+      </div>
+    </div>
+    <div class="journey" id="journey"></div>
+    <div class="progressbar"><div id="pbar"></div></div>
+  </header>
+  <main id="stage"></main>
+</div>
+
+<script>
+/* =====================  المجالات  ===================== */
+const LEVELS = [
+  {id:'L1', name:'الحكاية الأولى', icon:'🌱', badge:'وسام الجذور', desc:'الجذور والتأسيس ولماذا وُجدت كفاءات', rec:true},
+  {id:'L2', name:'بطاقة الهوية', icon:'🧭', badge:'وسام الهوية', desc:'الرؤية والرسالة والقيم وقصص صياغتها', rec:true},
+  {id:'L3', name:'نظرة المستقبل', icon:'🚀', badge:'وسام الرؤية', desc:'طموحات ٢٠٣٠ والتوسع والاستدامة', rec:true},
+  {id:'C3', name:'اللوائح والحوكمة', icon:'⚖️', badge:'وسام الميزان', desc:'السياسات واللجان ومصفوفات الصلاحيات'},
+  {id:'C4', name:'منظومة البرامج', icon:'🧩', badge:'وسام المنظومة', desc:'قصص نشأة البرامج الاثني عشر وفلسفتها'},
+  {id:'C5', name:'خلف الكواليس', icon:'⚙️', badge:'وسام الإتقان', desc:'كيف تدار البرامج وعوامل نجاحها'},
+  {id:'C6', name:'الرقمنة والبيانات', icon:'💾', badge:'وسام التحول', desc:'رحلة التحول الرقمي والأنظمة'},
+  {id:'C7', name:'أثر كفاءات', icon:'💠', badge:'وسام الأثر', desc:'ماذا تغيّر؟ ومن تأثر؟ وقصص التحول'},
+  {id:'C8', name:'البوابة والمنصات', icon:'🌐', badge:'وسام الحضور', desc:'بوابة كفاءات والقناة ومنصات التواصل'},
+  {id:'C9', name:'نموذج الاستنساخ', icon:'🗝️', badge:'وسام الريادة', desc:'كيف تُنقل التجربة للصناديق الأخرى'},
+  {id:'B1', name:'الخط الزمني', icon:'🕰', badge:'وسام الذاكرة', desc:'تثبيت سنوات المحطات والواجهات'},
+  {id:'B2', name:'خزانة الوثائق', icon:'📜', badge:'وسام الأمانة', desc:'ما المتوفر من وثائق وملفات وأذونات'},
+  {id:'B3', name:'أصوات الحكاية', icon:'🎙', badge:'وسام الوفاء', desc:'ترشيح الرواة والقصص الختامية'},
+];
+
+const ROLES = ['رئيس مجلس الإدارة','عضو مجلس إدارة','اللجنة التنفيذية','قائد برنامج','مشرف / مشرفة','فريق تنفيذي'];
+
+/* جاهزية الإجابة عن الأسئلة العميقة */
+const READY = ['جاهزة للمقابلة','أدوّنها في الملاحظات أدناه','لدى زميلٍ آخر إجابة أوفى','خارج اطلاعي'];
+const PROGRAMS12 = ['نبلاء','قارئ','متحدث','كاتب','مثقف','قائد','ماهر','موهوب','متفوق','مبتكر','تاجر','رياضي'];
+
+/* =====================  الأسئلة  ===================== */
+const QUESTIONS = [
+/* ---------- L1: الحكاية الأولى ---------- */
+{lv:'L1', title:'ما الذي أنبت فكرة تأسيس «كفاءات»؟', hint:'اختاروا كل ما ينطبق — والتفاصيل نسعد بسماعها في المقابلات.',
+ parts:[
+  {type:'multi', key:'spark', options:['ملاحظة احتياجٍ لدى جيل الأبناء','نقاش في مجلس عائلي','توجيه ورؤية من كبار الأسرة','استشعار مسؤولية شرعية تجاه الأبناء','إلهام من تجربة جهة أو أسرة أخرى','مبادرة من أحد أفراد الأسرة تبنّتها البقية','امتداد طبيعي لرسالة الصندوق','مواكبة النهضة التنموية في المملكة','رغبة في استثمار أوقات الأبناء بالنافع','سبب آخر']},
+  {type:'text', key:'sparkNote', label:'من طرح الفكرة أول مرة؟ وأين؟ وما القصة إن حضرت؟ (اختياري)', interview:true}
+]},
+{lv:'L1', title:'أي البرامج والأنشطة كانت من باكورة أعمال المؤسسة؟', hint:'اختاروا ما بدأ مبكراً ولو بصورة مبسطة.',
+ parts:[
+  {type:'multi', key:'firstPrograms', options:['برنامج نبلاء / نبيل التربوي','نادي القراءة','نادي كفاءات الترفيهي الصيفي','برامج الإلقاء والتحدث','المسابقات الثقافية والقرآنية','الرحلات واللقاءات العائلية','الحفل السنوي','الدورات التدريبية','برامج البنات','مجلة أو نشرات معرفية','نشاط آخر']},
+  {type:'text', key:'firstProgramsNote', label:'اسم أول نشاط نُفذ على الإطلاق إن حضركم، وذكرى من يومه الأول (اختياري)', interview:true}
+]},
+{lv:'L1', title:'من الرجال والنساء الذين حملوا المشروع في سنواته الأولى؟', hint:'أضيفوا الأسماء التي تحضركم، واختاروا إسهامات كلٍّ منهم بالنقر.',
+ parts:[
+  {type:'people', key:'founders', roles:['موّل','خطّط','نفّذ','أقنع الأسرة','أشرف تربوياً','دعم إعلامياً','قاد التطوع']},
+  {type:'multi', key:'foundersPref', label:'ويمكنكم أيضاً اختيار:', options:['نفضّل حصرهم كاملاً في المقابلة تكريماً لهم','بعض الأسماء تحتاج استئذاناً قبل النشر']}
+]},
+{lv:'L1', title:'ككل مشروع مبارك: ما التساؤلات الطبيعية التي رافقت البداية؟', hint:'ذكرُها يُظهر حكمة القائمين في تجاوزها، ويجعل الحكاية أقرب للقارئ.',
+ parts:[
+  {type:'multi', key:'earlyQuestions', options:['حجم التكلفة ومصادر التمويل','تساؤلات حول مدى تفاعل الأبناء','ترتيبات مشاركة البنات بما يليق','الموازنة مع جهود قائمة في الأسرة','ضيق أوقات الأبناء وارتباطاتهم الدراسية','قلة الخبرة التنظيمية في البدايات','تفاوت قناعات بعض الفروع بالفكرة','لم تكن هناك تساؤلات تُذكر','أخرى']},
+  {type:'multi', key:'earlyAnswered', label:'وبمَ اطمأنت القلوب وتجاوزتم ذلك؟', options:['بالحوار والإقناع داخل المجالس','بتجربة صغيرة أثبتت نجاحها','بدعم ومباركة كبار الأسرة','بمرور الوقت وظهور النتائج','بضوابط شرعية وتنظيمية واضحة','بالشفافية في التقارير والأرقام','بالدعاء والاستخارة ثم المضي بتوكل']}
+]},
+{lv:'L1', title:'ما التحديات التي مرّت بها المسيرة، وكيف يسّر الله تجاوزها؟', hint:'كل مسيرة عطاء تمر بتحديات، وتجاوزُها جزء مضيء من الحكاية يستفيد منه من يأتي بعدكم.',
+ parts:[
+  {type:'multi', key:'challenges', label:'أنواع التحديات التي مررتم بها:', options:['برنامج لم يجد الإقبال المأمول','شراكة أو تعاون لم يكتمل','تحدٍّ تمويلي في بعض الفترات','تحدٍّ تنظيمي أو إداري','ندرة المشرفين والمتفرغين','تفاوت حماس المشاركين بين المواسم','ظروف عامة كالجائحة','صعوبة الوصول لفروع الأسرة البعيدة','لم نواجه تحديات كبيرة ولله الحمد','تحدٍّ آخر']},
+  {type:'multi', key:'challengesHow', label:'وبمَ واجهتموها غالباً؟', options:['إعادة تصميم البرامج وتطويرها','تحسين أساليب التشويق والتسويق','الاستعانة بخبرات واستشارات خارجية','تنويع مصادر التمويل','التحول للعمل عن بُعد والحلول الرقمية','توسيع فريق التطوع وتوزيع الأدوار','الصبر والمواصلة مع التقويم المستمر','الرجوع لكبار الأسرة وحسم الأمور بالشورى','الدعاء وسؤال الله التوفيق']},
+  {type:'text', key:'challengeStory', label:'قصة تحدٍّ وتجاوزه تستحق التوثيق (عنوانها يكفي)', interview:true}
+]},
+{lv:'L1', title:'ما قصة اختيار اسم «كفاءات» وشعار «تصنع فَرْقاً»؟',
+ parts:[
+  {type:'multi', key:'nameHow', label:'كيف اختير الاسم؟', options:['اقتراح فردي اعتُمد','عصف ذهني جماعي','مسابقة أو مشاورة بين أفراد الأسرة','بمساعدة مختص','تطوّر عن اسم أو فكرة سابقة','لا نتذكر التفاصيل']},
+  {type:'multi', key:'nameAlt', label:'هل طُرحت أسماء بديلة؟', options:['نعم ونتذكر بعضها','نعم ولا نتذكرها','لا']},
+  {type:'text', key:'nameNote', label:'الأسماء البديلة إن حضرت، أو قصة الشعار (اختياري)', interview:true}
+]},
+
+/* ---------- L2: بطاقة الهوية ---------- */
+{lv:'L2', title:'كيف صيغت الرؤية والرسالة الحاليتان؟',
+ parts:[
+  {type:'multi', key:'visionHow', label:'طريقة الصياغة:', options:['ورش عمل داخلية','بمساعدة مستشار أو بيت خبرة','مقارنات مرجعية بتجارب مشابهة','استبانات ومقترحات أفراد الأسرة','اجتهاد فريق ثم اعتماد المجلس','تطوير متدرج نضج عبر السنوات']},
+  {type:'multi', key:'visionWho', label:'من شارك في الصياغة؟', options:['مجلس الإدارة','اللجنة التنفيذية','كبار الأسرة','شباب وفتيات الأسرة','فريق كفاءات التنفيذي','مستشارون خارجيون']}
+]},
+{lv:'L2', title:'لماذا اختير أفق «العشرين عاماً» تحديداً في الرؤية؟',
+ parts:[
+  {type:'multi', key:'twenty', options:['مدة نضوج جيل كامل','طموح أثرٍ يمتد بإذن الله إلى ما بعد الحاضر','مواءمة مع الرؤى الوطنية بعيدة المدى','توصية استشارية','رقم واقعي قابل للقياس والمتابعة','سبب آخر']}
+]},
+{lv:'L2', title:'لاحظنا تطور صياغة الرؤية بين ٢٠٢٤ و٢٠٢٥ (من «المرجع الأول» إلى «الوجهة الأولى»). ما دوافع هذا التطوير؟',
+ parts:[
+  {type:'multi', key:'rewording', options:['توسيع الطموح','تجويد الصياغة اللغوية','مواكبة الاستراتيجية الجديدة ٢٠٢٦–٢٠٣٠','ملاحظات وتطلعات من الأسرة','توصية بيوت الخبرة','تطور طبيعي مع نضج التجربة','لا نتذكر السبب الدقيق']}
+]},
+{lv:'L2', title:'لكل قيمة من قيمكم الخمس: هل لديكم قصة حقيقية تجسّدها؟', hint:'سنطلب رواية القصص الجاهزة في المقابلات لتزيّن فصل الهوية.',
+ parts:[
+  {type:'matrix', key:'valuesStories',
+   rows:['الابتكار والإبداع','التعاون والشراكة','التنمية المستدامة','المسؤولية','التفوق'],
+   cols:['نعم وجاهزة للرواية','نعم وتحتاج استئذان صاحبها','سنبحث عن مثال']}
+]},
+{lv:'L2', title:'ما قصة شمول أولاد البنات وأنساب القوم ضمن المستفيدين؟',
+ parts:[
+  {type:'multi', key:'inlawsWhen', label:'متى استقر ذلك؟', options:['منذ التأسيس','في السنوات الأولى','بعد نضج التجربة','تدرّج بحسب البرامج','لا نتذكر بدقة']},
+  {type:'multi', key:'inlawsWhy', label:'وما الدوافع؟', options:['مبدأ صلة الرحم الشاملة','عموم النفع المقصود شرعاً','طلبات ورغبات العائلات','توسيع دائرة الأثر','قرار مؤسسي مدروس بعد نقاش']}
+]},
+{lv:'L2', title:'كيف تصفون علاقة المؤسسة بصندوق الأسرة؟',
+ parts:[
+  {type:'multi', key:'fundMoney', label:'من جهة التمويل:', options:['الصندوق هو الرافد الأساسي','مزيج من الصندوق والرعايات','رسوم رمزية تسهم في بعض البرامج','موارد متنوعة تتنامى عاماً بعد عام']},
+  {type:'multi', key:'fundDecision', label:'ومن جهة القرار:', options:['ضمن مظلة الصندوق وتوجهاته','استقلال تشغيلي ضمن إطار عام من الصندوق','استقلال واسع مع تنسيق مستمر']}
+]},
+
+/* ---------- L3: نظرة المستقبل ---------- */
+{lv:'L3', title:'ما صورة «كفاءات» التي يتطلع إليها المجلس عام ٢٠٣٠ بإذن الله؟',
+ parts:[
+  {type:'multi', key:'vision2030', options:['مرجع للصناديق العائلية في المملكة','أكاديمية أو منصة تعليمية متكاملة','وقف تعليمي مستدام','توسيع الفئات والأعمار المخدومة','مؤسسة رقمية تعمل بالبيانات والذكاء الاصطناعي','شبكة شراكات وطنية أوسع','مضاعفة القيادات الشابة المؤهلة','تجويد الأثر الحالي وتعميقه']}
+]},
+{lv:'L3', title:'ما البرامج أو الفئات التي تستحق مزيداً من التوسع؟',
+ parts:[
+  {type:'multi', key:'expand', options:['الطفولة المبكرة','الأمهات وأولياء الأمور','الشباب العامل والمهني','البرامج التقنية والذكاء الاصطناعي','برامج الفتيات','ريادة الأعمال والوعي المالي','البرامج الإيمانية والقيمية','أبناء الأسرة خارج الرياض','كبار السن وبرامج الأجيال','فئة أو برنامج آخر']}
+]},
+{lv:'L3', title:'ما توجهكم حيال إفادة غير أبناء الأسرة من التجربة مستقبلاً؟',
+ parts:[
+  {type:'multi', key:'openUp', options:['نخطط لفتح بعض البرامج تدريجياً','ممكن بضوابط ومعايير محددة','عبر نقل التجربة والمعرفة لا فتح البرامج','عبر المحتوى الرقمي المفتوح','ليس في المدى القريب','نكتفي بخدمة الأسرة وأنسابها']}
+]},
+{lv:'L3', title:'بعد ملتقى عنيزة وأمثاله: كيف كان صدى التجربة لدى الجهات الأخرى؟',
+ parts:[
+  {type:'multi', key:'copyReq', options:['طلبت جهة واحدة نقل التجربة فعلياً','طلبت جهتان إلى ثلاث','طلبت أكثر من ثلاث جهات','اهتمام واستفسارات دون طلب رسمي','دعوات لعرض التجربة في ملتقيات','لم يصلنا طلب بعد']},
+  {type:'text', key:'copyNote', label:'أسماء الجهات إن أمكن ذكرها (اختياري)', interview:true}
+]},
+{lv:'L3', title:'ما الجوانب التي تحرصون على تحصينها لضمان استمرار العطاء بإذن الله؟',
+ parts:[
+  {type:'multi', key:'safeguard', options:['استدامة التمويل وتنويعه','حماس الأجيال الجديدة وارتباطها','توسيع قاعدة القيادات وعدم الاعتماد على أفراد بأعينهم','تأهيل الصف الثاني والثالث','حفظ أوقات الأبناء من منافسة المنصات','ضبط وتيرة التوسع بما يناسب الطاقة','توثيق المعرفة المؤسسية وتوريثها','جودة العلاقة مع فروع الأسرة كافة']},
+  {type:'multi', key:'succession', label:'وأين وصلت جهود تعاقب القيادات؟', options:['خطة مكتوبة ومطبقة','خطة قيد الإعداد','تأهيل عملي مستمر دون وثيقة','ضمن أولويات المرحلة القادمة']}
+]},
+{lv:'L3', title:'ما دور الذكاء الاصطناعي والبيانات في مرحلتكم القادمة؟',
+ parts:[
+  {type:'multi', key:'ai', options:['تحليل بيانات المستفيدين وقياس الأثر','تخصيص تجربة كل مستفيد','إنتاج محتوى تعليمي وإعلامي','أتمتة العمليات الإدارية','مساعد ذكي لخدمة أفراد الأسرة','تدريب الأبناء على أدوات الذكاء الاصطناعي','مشاريع لم تُعلن بعد','ندرسها بتأنٍّ قبل التوسع']}
+]},
+
+/* ---------- C3: اللوائح والحوكمة (أسئلة عمر - الفصل الثالث) ---------- */
+{lv:'C3', title:'ما اللوائح والسياسات التي تستند إليها المؤسسة اليوم؟',
+ parts:[
+  {type:'multi', key:'policies', options:['لائحة الشؤون الوظيفية','لوائح تقويم الأداء','مصفوفة الصلاحيات','سياسات الحوكمة','سياسة إدارة المخاطر','لائحة اللجان واختصاصاتها','أدلة الإجراءات','سياسة الموارد البشرية','سياسات مالية','سياسة أخرى']}
+]},
+{lv:'C3', title:'كيف بُنيت هذه اللوائح؟ وكيف تُرجمت الاستراتيجية إلى سياسات تضبط العمل؟',
+ parts:[
+  {type:'multi', key:'policiesHow', options:['ترجمة مباشرة لأهداف الاستراتيجية','بمساعدة بيوت خبرة','استئناس بنماذج جهات مشابهة','تطوير داخلي متدرج مع التجربة','بمراجعة شرعية وقانونية','تُحدَّث دورياً وفق آلية معتمدة']},
+  {type:'multi', key:'policiesValues', label:'وما القيم التي استُحضرت أثناء بنائها؟', options:['العدالة بين المنسوبين','الشفافية والإفصاح','حفظ خصوصية الأسرة','التمكين وعدم المركزية','الإتقان والجودة','الاستدامة بعد الأشخاص']}
+]},
+{lv:'C3', title:'ما ملامح الحوكمة الحالية: اللجان والقرار والإفصاح؟',
+ parts:[
+  {type:'multi', key:'governance', options:['مجلس إدارة بدورات منتظمة','لجنة تنفيذية','لجان دائمة متخصصة','لجان مؤقتة للمشاريع','أعضاء مستقلون في المجالس أو اللجان','آلية موثقة لدراسة المشاريع واعتمادها','ممارسات إفصاح دورية للأسرة','توثيق ومتابعة للقرارات بين المجلس واللجنة']}
+]},
+{lv:'C3', title:'كيف تُدار الموارد البشرية وبيئة العمل؟',
+ parts:[
+  {type:'multi', key:'hr', options:['أوصاف وظيفية محددة لكل برنامج','آلية معلنة لاختيار مديري البرامج','قياس دوري لأداء العاملين','تأهيل قادة من أبناء الأسرة لإدارة البرامج','مزيج من المتفرغين والمتطوعين','برامج تحفيز وتكريم للمنسوبين']},
+  {type:'text', key:'hrNote', label:'كيف ترون جاذبية العمل في كفاءات؟ (اختياري)', interview:true}
+]},
+{lv:'C3', title:'أسئلة الحوكمة العميقة: ما جاهزيتكم للإجابة عنها؟', hint:'نقرة لكل سطر — تساعدنا نعرف من نقابل وعن ماذا.',
+ parts:[
+  {type:'matrix', key:'c3ready',
+   rows:['أول لائحة أُقرت ولماذا كانت البداية بها','رحلة تطور الهيكلة منذ التأسيس حتى اليوم','آليات دراسة المشاريع واتخاذ القرار','العلاقة بين المجلس واللجنة التنفيذية','الأنظمة التي أسهمت في الاستدامة ونصائح للصناديق الناشئة','تحديات الاستدامة وكيف عولجت'],
+   cols:READY}
+]},
+{lv:'C3', title:'خزانة اللوائح: ما الذي يمكن تزويد فريق الكتابة به؟',
+ parts:[
+  {type:'matrix', key:'c3docs',
+   rows:['السياسات والأنظمة','اللوائح التنفيذية','هيكلة المنظمة','هيكلة الإجراءات','الأدلة','مصفوفة الصلاحيات'],
+   cols:['متوفر ويُشارك الآن','يمكن توفيره','يحتاج إذناً خاصاً','نبحث عنه']}
+]},
+
+/* ---------- C4: منظومة البرامج (أسئلة الفصل الرابع) ---------- */
+{lv:'C4', title:'كيف نشأت منظومة البرامج الاثني عشر؟',
+ parts:[
+  {type:'multi', key:'progsBirth', options:['ضمن تخطيط مسبق لمنظومة متكاملة','نشأ بعضها استجابة لاحتياجات مرحلية','مزيج من التخطيط والاستجابة','تطوّر بعضها من أنشطة قديمة','وُلد بعضها من مقترحات الأبناء أنفسهم']},
+  {type:'multi', key:'progsWhy', label:'وما الذي جعلكم تختارون هذا الاتساع (قيم وقراءة وقيادة ومال ورياضة...)؟', options:['بناء الإنسان من كل الزوايا','تنوع ميول الأبناء واهتماماتهم','تغطية المراحل العمرية المختلفة','اكتشاف المواهب أينما كانت','لكل برنامج قصة احتياج كشفها الواقع']}
+]},
+{lv:'C4', title:'أي البرامج أقرب إلى روح كفاءات الجامعة؟', hint:'هل نبلاء هو الخيط القيمي المتصل بين البرامج كلها؟ اختاروا ما ترونه.',
+ parts:[
+  {type:'multi', key:'soulProgram', options:PROGRAMS12.concat(['كلها معاً منظومة واحدة'])}
+]},
+{lv:'C4', title:'كيف كان حظ كل برنامج من الانتشار مقارنة بالتوقعات؟', hint:'نقرة لكل برنامج — إجابة صادقة تُغني فصلاً كاملاً.',
+ parts:[
+  {type:'matrix', key:'progsPerf',
+   rows:PROGRAMS12,
+   cols:['فاق التوقع','وفق المتوقع','دون المأمول','توقف أو تحوّل','حديث لم يُقيَّم']}
+]},
+{lv:'C4', title:'إلامَ تعزون تفاوت استجابة الأبناء والبنات بين برنامج وآخر؟',
+ parts:[
+  {type:'multi', key:'progsVariance', options:['أعمار الفئة المستهدفة','جاذبية أسلوب التقديم','توقيت البرنامج في العام','قوة المشرف وحضوره','طبيعة اهتمامات الجيل','المنافسة مع الدراسة والارتباطات','عمق العلاقة السابقة بالبرنامج','تفاوت التسويق والتشويق']}
+]},
+{lv:'C4', title:'لو اختزلتم فلسفة البرامج كلها في مبدأ واحد، فما هو؟',
+ parts:[
+  {type:'multi', key:'progsPhilosophy', options:['بناء الإنسان من كل الزوايا','القيم أولاً ثم المهارات','اكتشافٌ ثم تمكين','التعلم بالممارسة والمتعة','النفع المتعدي عبادة','خيط قيمي واحد بأدوات متعددة']},
+  {type:'text', key:'kafaaMeaning', label:'ما الذي علّمتكم إياه التجربة عن معنى «الكفاءة» عملياً لا نظرياً؟ (اختياري)', interview:true}
+]},
+{lv:'C4', title:'قصص البرامج العميقة: ما جاهزيتكم لروايتها؟',
+ parts:[
+  {type:'matrix', key:'c4ready',
+   rows:['قصة نشأة كل برنامج وشرارته الأولى','الترتيب الزمني الحقيقي لانطلاق البرامج','لماذا أُفرد نادي القراءة بمسار ظاهر دون بقية البرامج','برامج أُطلقت ثم توقفت ولماذا','احتياجات غير متوقعة اكتشفتموها فغيّرت التصميم','قصة شخصية ملهمة تمثل كل برنامج','ترتيب البرامج بحسب رحلة بناء الإنسان'],
+   cols:READY}
+]},
+
+/* ---------- C5: خلف الكواليس (أسئلة الفصل الخامس) ---------- */
+{lv:'C5', title:'كيف تولد البرامج داخل كفاءات؟',
+ parts:[
+  {type:'multi', key:'ideaBirth', options:['من ملاحظة احتياج','من طلب أفراد الأسرة','من مبادرة فردية','من قرار مؤسسي مخطط','من تطوير نشاط قائم','من فرصة أو شراكة سنحت']},
+  {type:'multi', key:'designStart', label:'ومن أين يبدأ التصميم عادة؟', options:['من الهدف','من الفئة المستهدفة','من المشكلة أو الاحتياج','من الفرصة المتاحة','من نموذج ناجح نستأنس به']}
+]},
+{lv:'C5', title:'كيف تتكوّن فرق العمل لكل برنامج؟',
+ parts:[
+  {type:'multi', key:'teams', options:['أبناء الأسرة أولاً ما أمكن','مزيج من الأبناء ومتخصصين خارجيين','متخصصون خارجيون للبرامج النوعية','متطوعون بإشراف مركزي','يتفاوت بحسب طبيعة كل برنامج']},
+  {type:'multi', key:'teamsBalance', label:'وكيف توازنون بين أبناء الأسرة والمتخصصين؟', options:['الأولوية للابن المؤهل','المتخصص للتدريب والابن للإشراف','الجودة أولاً أياً كان المصدر','نصنع المتخصص من الأبناء تدريجياً']}
+]},
+{lv:'C5', title:'ما أبرز تحديات التنفيذ التي تتعاملون معها؟',
+ parts:[
+  {type:'multi', key:'execChallenges', options:['الحضور والالتزام','مستوى التفاعل','الوقت والجداول المزدحمة','المكان والتجهيزات','ضبط الجودة','إقناع الأبناء بالبرامج الجادة الأقل ترفيهاً','استمرارية المشرفين','تحدٍّ آخر']},
+  {type:'multi', key:'seriousHow', label:'وكيف تكسبون الأبناء للبرامج الجادة تحديداً؟', options:['مزج الجدية بالمتعة والتشويق','الحوافز والتكريم','قدوات من الأبناء أنفسهم','إشراك الأهالي في التحفيز','ربط البرنامج بأثر ملموس لهم','تدرّج في مستوى الالتزام']}
+]},
+{lv:'C5', title:'ما أهم عوامل نجاح البرنامج في تجربتكم؟ وما أسباب تعثر بعضها؟',
+ parts:[
+  {type:'multi', key:'successFactors', label:'عوامل النجاح:', options:['قوة المشرف وحضوره','جاذبية الأسلوب','وضوح الهدف والمخرجات','الحوافز والتكريم','دعم الأهالي','التسويق والتهيئة الجيدة','التوقيت المناسب','فريق عمل متجانس']},
+  {type:'multi', key:'stumbleFactors', label:'وأسباب التعثر حين يقع:', options:['توقيت غير مناسب','ضعف التهيئة والتسويق','ازدحام ارتباطات الأبناء','تغيّر المشرف أثناء البرنامج','طموح أكبر من الموارد','طبيعة الفئة المستهدفة']}
+]},
+{lv:'C5', title:'كيف تقيسون أثر البرامج وتحوّلون التقييم إلى تطوير؟',
+ parts:[
+  {type:'multi', key:'measure', options:['قياس قبلي وبعدي','استبانات رضا','مؤشرات أداء لكل منشط','تقارير ختامية لكل برنامج','تختلف الأدوات بحسب نوع البرنامج (معرفي/مهاري/قيمي/رياضي)','ملاحظات المشرفين الميدانية','تتحول التوصيات لتحسينات في النسخ التالية']}
+]},
+{lv:'C5', title:'أسرار التشغيل: ما جاهزيتكم لرواية هذه الجوانب؟',
+ parts:[
+  {type:'matrix', key:'c5ready',
+   rows:['رحلة برنامج واحد من الفكرة إلى التقرير الختامي','الشيء الذي لا يراه المستفيدون لكنه يصنع الفرق','ممارسة بسيطة أحدثت فرقاً كبيراً','أبرز ما تغيّر في أسلوب الإدارة عبر السنوات','المبادئ التي لا يجوز أن تتغير مهما تغيّر الأشخاص','مصدر الإلهام للاستمرار رغم تحديات التشغيل'],
+   cols:READY}
+]},
+
+/* ---------- C6: الرقمنة والبيانات (أسئلة عمر - الفصل السادس) ---------- */
+{lv:'C6', title:'صفوا رحلة التحول الرقمي: بأي المراحل مررتم؟',
+ parts:[
+  {type:'multi', key:'digitalJourney', options:['عمل ورقي كامل في البدايات','جداول وملفات مشتركة','أنظمة جاهزة متفرقة','بوابة موحدة','أتمتة شاملة مع تطبيق جوال','جرّبنا أنظمة ثم استبدلناها بأنسب منها']}
+]},
+{lv:'C6', title:'ما الأنظمة التي تعتمد عليها المؤسسة اليوم؟',
+ parts:[
+  {type:'multi', key:'systems', options:['البوابة الداخلية','نظام تسجيل وبيانات المستفيدين','نظام مالي','ربط ببرمجيات كبرى (مثل أودو أو مشابه)','أنظمة تواصل وإشعارات','لوحات معلومات (داشبورد)','أرشفة إلكترونية']}
+]},
+{lv:'C6', title:'ما البيانات التي تحرصون على جمعها؟ وكيف تخدم القرار؟',
+ parts:[
+  {type:'multi', key:'dataCollected', label:'البيانات المجموعة:', options:['بيانات المستفيدين والمشاركة','نتائج القياس القبلي والبعدي','مؤشرات الرضا','ساعات وجهود التطوع','بيانات مالية','تفاعل المنصات الرقمية']},
+  {type:'multi', key:'dataUse', label:'وأثرها في القرار:', options:['تقارير دورية للمجلس','المفاضلة بين البرامج','استشراف وتخطيط للمستقبل','قياس أثر تراكمي','بدأنا حديثاً ونطمح لأكثر']}
+]},
+{lv:'C6', title:'ماذا وفّرت الرقمنة مقارنة بما قبلها؟',
+ parts:[
+  {type:'multi', key:'digitalGains', options:['اختصار وقت التسجيل والتنظيم','دقة البيانات وتقليل الأخطاء','سهولة التقارير','وصول أسرع لأفراد الأسرة','مرونة تنظيمية بين التقني والإداري','خبرة رقمية تراكمت لدى الفريق']},
+  {type:'text', key:'digitalStory', label:'مثال ملموس: إجراء كان يستغرق كذا وأصبح كذا (اختياري)', interview:true}
+]},
+{lv:'C6', title:'أذونات الاطلاع التقني: ما الممكن منها لفريق الكتابة؟',
+ parts:[
+  {type:'matrix', key:'c6access',
+   rows:['عرض حي للبوابة الداخلية ونموذج سير الإجراءات','الاطلاع على لوحة البيانات (داشبورد)','وصف إجراء كامل من بدايته إلى التقرير','مقارنة قبل/بعد الرقمنة بالأرقام','لقاء مع المختص التقني'],
+   cols:['ممكن ومرحب به','يحتاج إذناً','عبر مختص التقنية','غير متاح حالياً']}
+]},
+
+/* ---------- C7: أثر كفاءات (أسئلة الفصل السابع) ---------- */
+{lv:'C7', title:'ما العلامات التي تجعلكم تقولون: هذا الأثر حقيقي وليس انطباعاً عابراً؟',
+ parts:[
+  {type:'multi', key:'impactSigns', options:['تغيّر سلوك ملموس ومستمر','مواظبة المشاركة سنوات متتالية','انتقال مستفيدين إلى مشرفين وقادة','شهادات الأهالي','نتائج قياس موثقة','أثر ظهر خارج الأسرة (مدرسة/جامعة/عمل)','طلب الأبناء للمزيد من تلقاء أنفسهم']}
+]},
+{lv:'C7', title:'ما أكثر التحولات التي لاحظتموها في أبناء وبنات الأسرة؟',
+ parts:[
+  {type:'multi', key:'transformations', options:['الثقة والحضور والقدرة على التعبير','علاقة أعمق بالكتاب والقراءة وإنتاج الفوائد','توثّق صلة الرحم والتعارف بين الفروع','تنافس شريف محفّز','اكتشاف مواهب لم تكن ظاهرة','وعي مالي ومهني مبكر','تغيّر نظرة الكبار إلى مواهب الصغار','ذاكرة مشتركة تتجاوز اللقاءات المعتادة']}
+]},
+{lv:'C7', title:'هل انتقل مستفيدون من متلقين إلى متطوعين ومشرفين وقادة برامج؟',
+ parts:[
+  {type:'multi', key:'graduates', options:['نعم، كثير منهم','حالات مميزة معدودة','بدأ هذا التوجه حديثاً','هو هدف نعمل عليه']},
+  {type:'multi', key:'graduatesCount', label:'كم يبلغون تقريباً؟', options:['١ – ٥','٦ – ١٥','١٦ – ٣٠','أكثر من ٣٠','تتوفر إحصائية دقيقة سنزودكم بها']}
+]},
+{lv:'C7', title:'هل امتد الأثر إلى الآباء والأمهات والأسرة الكبيرة؟',
+ parts:[
+  {type:'multi', key:'parentsImpact', options:['حماس ومتابعة من الأهالي','مشاركة فعلية في بعض البرامج','تغيّر في أساليب تربوية','طلب برامج خاصة بالأمهات أو الآباء','تقارب بين الأجيال','قصص وصلتنا من داخل البيوت']}
+]},
+{lv:'C7', title:'ما الأثر الذي تتمنونه ولم يتحقق بعد بالعمق المطلوب؟',
+ parts:[
+  {type:'multi', key:'impactGap', options:['الكتابة والتأليف','البرامج المهنية','انتظام الفئات الأكبر سناً','الوصول لكل فروع الأسرة','التوثيق المستمر لقصص الأثر','عمق أثر بعض البرامج مقابل انتشارها']},
+  {type:'text', key:'impactWish', label:'ما الجملة التي تتمنون أن يختصر بها ابنُ الأسرة أثرَ كفاءات؟ (اختياري)', interview:true}
+]},
+{lv:'C7', title:'قصص الأثر العميقة: ما جاهزيتكم لروايتها؟',
+ parts:[
+  {type:'matrix', key:'c7ready',
+   rows:['قصص أبناء وبنات تغيّر مسارهم بسبب برنامج','كيف غيّر نادي القراءة علاقة المشاركين بالكتاب','أثر برامج الإلقاء في ثقة الأبناء وحضورهم','أثر ظهر خارج حدود الأسرة','آثار إيجابية لم تكن مخططة','لو لم توجد كفاءات: ما الذي كان سينقص؟','الأثر الذي تطمحون أن يبقى بعد عشرين عاماً'],
+   cols:READY}
+]},
+
+/* ---------- C8: البوابة والمنصات (أسئلة عمر - الفصل الثامن) ---------- */
+{lv:'C8', title:'ما الخدمات التي تقدمها بوابة كفاءات؟ ولمن صُممت؟',
+ parts:[
+  {type:'multi', key:'portalServices', options:['التسجيل في البرامج','ملف شخصي لكل مستفيد','بيانات الأسرة وفروعها','الشهادات والإنجازات','الإشعارات والتواصل','محتوى معرفي','خدمات مالية أو رسوم','خدمة أخرى']}
+]},
+{lv:'C8', title:'كم تبلغ نسبة المسجلين في البوابة من المستهدفين من الأسرة؟',
+ parts:[
+  {type:'multi', key:'portalStats', options:['أقل من ٢٥٪','٢٥ – ٥٠٪','٥١ – ٧٥٪','أكثر من ٧٥٪','تتوفر إحصائية دقيقة (المسجلون، النشطون، الطلبات) سنزودكم بها']}
+]},
+{lv:'C8', title:'ما سياساتكم في نشر المحتوى (يوتيوب ومنصات التواصل)؟',
+ parts:[
+  {type:'multi', key:'contentPolicy', options:['خطة محتوى معتمدة','مراجعة واعتماد قبل النشر','معايير شرعية وتربوية','تقويم دوري لأداء الحسابات','قياس رضا الجمهور','بحسب الاجتهاد والحاجة حالياً']}
+]},
+{lv:'C8', title:'هل ترصدون ردود الأفعال على المحتوى، وخصوصاً البودكاست؟',
+ parts:[
+  {type:'multi', key:'feedback', options:['رصد منتظم للتفاعل','وصلتنا قصص نجاح من متابعين','تفاعل مميز مع البودكاست','رسائل إلهام واستفادة من خارج الأسرة','لا يوجد رصد منتظم بعد']},
+  {type:'text', key:'feedbackStory', label:'أبرز رسالة أو قصة وصلتكم من المتابعين (اختياري)', interview:true}
+]},
+{lv:'C8', title:'كيف نرتّب اطلاع فريق الكتابة على البوابة؟',
+ parts:[
+  {type:'multi', key:'portalAccess', options:['نرشح التواصل مع مختص البوابة والبيانات','نرتب عرضاً حياً للفريق','نزودكم بتقرير مكتوب عنها','لقاء ثانٍ مخصص للجانب التقني']}
+]},
+
+/* ---------- C9: نموذج الاستنساخ (أسئلة عمر - الفصل التاسع) ---------- */
+{lv:'C9', title:'ما العناصر التي يجب الحفاظ عليها عند نقل تجربتكم إلى الغير؟',
+ parts:[
+  {type:'multi', key:'cloneCore', options:['المنطلق الإيماني والقيمي','رعاية كبار الأسرة ومباركتهم','التدرج وعدم الاستعجال','القياس والتوثيق منذ البداية','بناء القيادات من الداخل','الحوكمة واللوائح','روح التطوع','خصوصية كل أسرة وظروفها']}
+]},
+{lv:'C9', title:'ما أكثر الأخطاء التي تنصحون الصناديق الناشئة بتجنبها؟',
+ parts:[
+  {type:'multi', key:'cloneMistakes', options:['الاستعجال قبل التأسيس','تقليد الشكل دون الروح','إهمال القياس والتوثيق','الاعتماد على فرد واحد','تجاهل خصوصية الأسرة وبيئتها','ضعف التمويل المستدام','التوسع قبل إتقان الصغير']}
+]},
+{lv:'C9', title:'أي البرامج ترونها الأكثر قابلية للاستنساخ في بيئات متنوعة؟', hint:'مثل ما لوحظ عن برنامج مثقف.',
+ parts:[
+  {type:'multi', key:'clonable', options:PROGRAMS12.concat(['نادي القراءة','منظومة التطوع','النموذج كاملاً بتكييف'])}
+]},
+{lv:'C9', title:'ما موقفكم من تطوير التجربة تحت مظلة وطنية (نمذجةً ونشراً كقصة نجاح)؟', hint:'لتقاطع عملكم مع رؤية ٢٠٣٠ في تنمية القدرات.',
+ parts:[
+  {type:'multi', key:'nationalUmbrella', options:['نرحب وندرس ذلك','جرت مباحثات أو اتصالات أولية','نفضّل النمو الذاتي أولاً','فكرة جديدة علينا تستحق الدراسة','لدينا تحفظات نوضحها في المقابلة']}
+]},
+{lv:'C9', title:'ماذا عن حقوق البرامج وقياس الأثر بعيد المدى؟',
+ parts:[
+  {type:'multi', key:'ipRights', label:'حقوق الأفكار والبرامج ووثائقها:', options:['وثّقنا برامجنا وحقوقها','في طور التوثيق','اطلعنا على تجارب عالمية في الاستنساخ','لم نبحث الموضوع بعد']},
+  {type:'multi', key:'longImpact', label:'وقياس الأثر بعيد المدى:', options:['نقيس القريب والمتوسط حالياً','بدأنا مؤشرات بعيدة المدى','ضمن خطط الاستراتيجية الجديدة','نبحث عن شريك بحثي متخصص']}
+]},
+{lv:'C9', title:'ما الذي يحفزكم لتوثيق التجربة ونشرها؟',
+ parts:[
+  {type:'multi', key:'docMotive', options:['حفظ الذاكرة للأجيال القادمة','نفع الصناديق والأسر الأخرى','إشادات وصلتنا من أسر أخرى','ترسيخ الممارسات قبل تعاقب القيادات','شكر النعمة بإظهار أثرها','دافع آخر']}
+]},
+
+/* ---------- B1: الخط الزمني ---------- */
+{lv:'B1', title:'ثبّتوا الفترة الزمنية لكل محطة من المحطات الكبرى', hint:'نقرة لكل محطة — وإن غابت السنة عن الذاكرة فلا حرج.',
+ parts:[
+  {type:'matrix', key:'milestones',
+   rows:['أول نشاط فعلي','التنظيم المؤسسي الرسمي','أول مجلس إدارة','أول خطة تشغيلية مكتوبة','إطلاق الهوية والشعار','الانتقال إلى المقر المستقل','أول تقرير سنوي','أول شراكة خارجية'],
+   cols:['قبل ٢٠١٣','٢٠١٣–٢٠١٦','٢٠١٧–٢٠٢٠','٢٠٢١–٢٠٢٣','٢٠٢٤ فأحدث','لا نتذكر']}
+]},
+{lv:'B1', title:'متى انطلقت واجهاتكم الإعلامية والرقمية؟',
+ parts:[
+  {type:'matrix', key:'mediaTimeline',
+   rows:['الحسابات في منصات التواصل','القناة اليوتيوبية','مجلة كفاءات','البودكاست','الموقع المؤتمت','تطبيق كفاءات','أول مشاركة في ملتقى خارجي'],
+   cols:['قبل ٢٠١٨','٢٠١٨–٢٠٢٠','٢٠٢١–٢٠٢٢','٢٠٢٣–٢٠٢٤','٢٠٢٥','لا نتذكر']}
+]},
+{lv:'B1', title:'كيف تعاملت المؤسسة مع الظروف العامة كفترة الجائحة؟', hint:'كثير من الجهات وجدت في تلك الفترة فرصاً غير متوقعة.',
+ parts:[
+  {type:'multi', key:'pause', options:['التحول للعمل عن بُعد','ابتكار برامج منزلية وأسرية','تكثيف المحتوى الرقمي','تخفيف مؤقت ثم عودة أقوى','استمر العمل بوتيرته تقريباً','زاد النشاط في تلك الفترة','اكتسبنا مهارات رقمية بقيت بعدها']}
+]},
+
+/* ---------- B2: خزانة الوثائق ---------- */
+{lv:'B2', title:'خزانة الوثائق: ما المتوفر لديكم مما يلي؟', hint:'هذه الوثائق تجعل الكتاب موثقاً لا مرويّاً فقط — نقرة لكل سطر.',
+ parts:[
+  {type:'matrix', key:'docs',
+   rows:['وثيقة أو محضر التأسيس','أول إصدار باسم كفاءات','صور الفعاليات الأولى','نسخ الشعار والهوية القديمة','قائمة مجالس الإدارة المتعاقبة','إحصاءات المستفيدين سنة بسنة','الموازنات التاريخية (ولو إجمالية)','نصوص الرؤية والرسالة بإصداراتها','مراسلات الجهات المهتمة بالتجربة','نماذج مشاركات مميزة بأذونات نشر'],
+   cols:['متوفر الآن','يمكن توفيره','نبحث عنه']}
+]},
+
+/* ---------- B3: أصوات الحكاية ---------- */
+{lv:'B3', title:'كم شخصاً يمكنكم ترشيحه للمقابلات من كل فئة؟', hint:'سنطلب أسماءهم وبيانات تواصلهم لاحقاً من منسقكم الكريم.',
+ parts:[
+  {type:'matrix', key:'voices',
+   rows:['مستفيدون قدامى (من السنوات الأولى)','أولياء أمور وأمهات','متطوعون ومشرفون','شركاء ومدربون خارجيون','كبار الأسرة وشهود البدايات'],
+   cols:['سنبحث لكم','١ – ٢','٣ – ٥','أكثر من ٥']}
+]},
+{lv:'B3', title:'ما القصة التي لا تظهر في التقارير، لكنها تختصر معنى كفاءات؟', hint:'عنوانها يكفي — وسنسمعها كاملة بإذن الله في المقابلات.',
+ parts:[
+  {type:'text', key:'mustStory', label:'عنوان القصة أو إشارة إليها', interview:true},
+  {type:'multi', key:'mustTeller', label:'من أفضل من يرويها؟', options:['رئيس مجلس الإدارة','أحد المؤسسين','أحد كبار الأسرة','أحد المستفيدين','أحد المشرفين أو المتطوعين','إحدى الأمهات','سنحدده لاحقاً']}
+]},
+{lv:'B3', title:'وأخيراً: ما السؤال الذي كنتم تتمنون أن نطرحه عليكم ولم نطرحه؟',
+ parts:[
+  {type:'text', key:'missedQuestion', label:'اكتبوا السؤال — وجوابه إن أحببتم', interview:true}
+]},
+];
+
+/* إضافة نافذة نص اختيارية لكل سؤال لا يحتوي واحدة */
+QUESTIONS.forEach((q,qi)=>{
+  if(!q.parts.some(p=>p.type==='text')){
+    q.parts.push({type:'text', key:'note_'+qi, label:'إضافة أو توضيح تحبون تدوينه (اختياري)', interview:true});
+  }
+});
+
+/* =====================  الحالة  ===================== */
+let state = {
+  rep:{name:'',role:''},
+  sections:['L1','L2','L3'],
+  answers:{}, points:0, qIndex:0,
+  completedLevels:[], visited:[], startedAt:new Date().toISOString(),
+};
+const RANKS = [
+  [0,'بذرةُ أثرٍ أولى'],[100,'غرسٌ ينمو بإذن الله'],[250,'ظلٌّ وارفٌ بفضل الله'],[450,'أثرٌ ممتدٌّ 🌳']
+];
+
+function activeLevels(){ return LEVELS.filter(l=>state.sections.includes(l.id)); }
+function activeQuestions(){ return QUESTIONS.filter(q=>state.sections.includes(q.lv)); }
+
+async function trySave(){
+  try{ if(window.storage) await window.storage.set('kafaat-journey-v3', JSON.stringify(state)); }catch(e){}
+}
+async function tryLoad(){
+  try{
+    if(window.storage){
+      const r = await window.storage.get('kafaat-journey-v3');
+      if(r && r.value){ state = JSON.parse(r.value); state.visited = state.visited||[]; return true; }
+    }
+  }catch(e){}
+  return false;
+}
+
+/* =====================  البداية واختيار المجالات  ===================== */
+function renderRoles(){
+  const c=document.getElementById('roleChips');
+  c.innerHTML=ROLES.map(r=>`<button type="button" class="chip small" onclick="pickRole(this)">${r}</button>`).join('');
+}
+function pickRole(btn){
+  [...document.querySelectorAll('#roleChips .chip')].forEach(b=>b.classList.remove('sel'));
+  btn.classList.add('sel');
+  document.getElementById('repRole').value=btn.textContent;
+}
+
+function goPicker(){
+  state.rep.name = document.getElementById('repName').value.trim();
+  state.rep.role = document.getElementById('repRole').value.trim();
+  document.getElementById('intro').style.display='none';
+  document.getElementById('picker').style.display='flex';
+  renderPicker();
+}
+function renderPicker(){
+  const qCount = id=>QUESTIONS.filter(q=>q.lv===id).length;
+  const g=document.getElementById('secGrid');
+  g.innerHTML=LEVELS.map(l=>`
+    <button type="button" class="sec-card ${state.sections.includes(l.id)?'sel':''} ${l.rec?'rec':''}" onclick="toggleSection('${l.id}',this)">
+      <div class="si">${l.icon}</div>
+      <div class="sn">${l.name}</div>
+      <div class="sd">${l.desc}</div>
+      <span class="sq">${qCount(l.id)} أسئلة</span>
+      ${state.completedLevels.includes(l.id)?'<span class="sq" style="background:#E5EFE2;color:#3E6B3A">مكتمل ✓</span>':''}
+    </button>`).join('');
+  const sb=document.getElementById('startBtn');
+  if(sb) sb.textContent = state.visited.length ? 'متابعة الرحلة 🌿' : '🌿 ابدأ رحلة التدوين';
+}
+
+function backToPicker(){
+  trySave();
+  document.getElementById('app').style.display='none';
+  document.getElementById('picker').style.display='flex';
+  renderPicker();
+}
+function toggleSection(id,el){
+  if(state.sections.includes(id)) state.sections=state.sections.filter(x=>x!==id);
+  else state.sections.push(id);
+  el.classList.toggle('sel');
+}
+function selectAllSections(){
+  state.sections=LEVELS.map(l=>l.id);
+  renderPicker();
+}
+
+function startJourney(){
+  if(!state.sections.length){ state.sections=['L1']; }
+  /* ترتيب المجالات بحسب ترتيبها الأصلي */
+  state.sections=LEVELS.map(l=>l.id).filter(id=>state.sections.includes(id));
+  /* الاستئناف من أول سؤال لم يُزر بعد ضمن المجالات المختارة */
+  const AQ=activeQuestions();
+  let idx=AQ.findIndex(q=>!state.visited.includes(QUESTIONS.indexOf(q)));
+  state.qIndex = idx===-1 ? AQ.length : idx;
+  document.getElementById('picker').style.display='none';
+  document.getElementById('app').style.display='block';
+  renderJourney(); renderQuestion();
+}
+
+window.addEventListener('load', async ()=>{
+  renderRoles();
+  const restored = await tryLoad();
+  if(restored && state.qIndex>0){
+    document.getElementById('intro').style.display='none';
+    document.getElementById('app').style.display='block';
+    renderJourney();
+    if(state.qIndex>=activeQuestions().length) renderFinal(); else renderQuestion();
+  }
+});
+
+/* =====================  العرض  ===================== */
+function levelOfActive(i){
+  const AQ=activeQuestions();
+  const AL=activeLevels();
+  return AL.findIndex(l=>l.id===AQ[i].lv);
+}
+
+function renderJourney(){
+  const AQ=activeQuestions(), AL=activeLevels();
+  const cur = state.qIndex < AQ.length ? levelOfActive(state.qIndex) : AL.length;
+  const j = document.getElementById('journey');
+  j.innerHTML='';
+  AL.forEach((lv,idx)=>{
+    if(idx>0){const c=document.createElement('div'); c.className='connector'; j.appendChild(c);}
+    const w=document.createElement('div');
+    w.className='diamond-wrap'+(state.completedLevels.includes(lv.id)?' done':(idx===cur?' active':''));
+    w.innerHTML=`<div class="diamond"><span>${state.completedLevels.includes(lv.id)?'✓':lv.icon}</span></div><small>${lv.name}</small>`;
+    j.appendChild(w);
+  });
+  document.getElementById('pbar').style.width = AQ.length? Math.round(100*Math.min(state.qIndex,AQ.length)/AQ.length)+'%' : '0%';
+  updateScore(0);
+  const active=j.querySelector('.diamond-wrap.active');
+  if(active) active.scrollIntoView({inline:'center', block:'nearest'});
+}
+
+function updateScore(add){
+  if(add>0){
+    state.points+=add;
+    const d=document.getElementById('impactBox');
+    d.classList.add('bump'); setTimeout(()=>d.classList.remove('bump'),250);
+  }
+  document.getElementById('pts').textContent=state.points;
+  let r=RANKS[0][1];
+  for(const [t,n] of RANKS) if(state.points>=t) r=n;
+  document.getElementById('rank').textContent=r;
+}
+
+function renderQuestion(){
+  const AQ=activeQuestions();
+  const i=state.qIndex;
+  if(i>=AQ.length){ renderFinal(); return; }
+  const q=AQ[i];
+  const gi=QUESTIONS.indexOf(q); /* الفهرس العام لعناصر DOM */
+  const lv=LEVELS.find(l=>l.id===q.lv);
+  const inLevel=AQ.filter(x=>x.lv===q.lv);
+  const posInLevel=inLevel.indexOf(q)+1;
+  document.getElementById('qCounter').textContent=`السؤال ${posInLevel} من ${inLevel.length} · ${lv.name}`;
+
+  const stage=document.getElementById('stage');
+  const card=document.createElement('div'); card.className='qcard';
+  let html=`<div class="q-eyebrow">${lv.icon} ${lv.name}</div>
+            <div class="q-title">${q.title}</div>`;
+  if(q.hint) html+=`<div class="q-hint">${q.hint}</div>`;
+  if(q.parts.some(p=>p.type==='multi'))
+    html+=`<span class="multi-note">✓ يمكنكم اختيار أكثر من إجابة</span>`;
+
+  q.parts.forEach((p,pi)=>{
+    const pid=`p${gi}_${pi}`;
+    html+=`<div class="part" id="${pid}">`;
+    if(p.label) html+=`<div class="part-label">${p.label}</div>`;
+    if(p.type==='multi'){
+      html+=`<div class="chips">`+p.options.map((o,oi)=>
+        `<button type="button" class="chip" data-part="${pi}" data-opt="${oi}" onclick="pick(${gi},${pi},${oi})">${o}</button>`).join('')+`</div>`;
+    }
+    if(p.type==='text'){
+      html+=`<textarea class="opt" id="txt_${pid}" placeholder="اكتبوا هنا إن أحببتم..." oninput="textIn(${gi},${pi})"></textarea>`;
+      if(p.interview){
+        html+=`<div style="margin-top:6px"><button type="button" class="chip small" id="iv_${pid}" onclick="toggleInterview(${gi},${pi})">🎙 أفضّل روايتها في المقابلة</button></div>`;
+      }
+      html+=`<div class="opt-note">اختياري — كل توضيح يزيد رصيد الأثر 🌿</div>`;
+    }
+    if(p.type==='matrix'){
+      html+=`<div class="matrix">`+p.rows.map((r,ri)=>
+        `<div class="mrow"><div class="mname">${r}</div><div class="seg">`+
+        p.cols.map((c,ci)=>`<button type="button" class="chip" data-row="${ri}" data-col="${ci}" onclick="pickMatrix(${gi},${pi},${ri},${ci})">${c}</button>`).join('')+
+        `</div></div>`).join('')+`</div>`;
+    }
+    if(p.type==='people'){
+      html+=`<div id="people_${pid}"></div>
+             <button type="button" class="add-person" onclick="addPerson(${gi},${pi})">＋ إضافة اسم</button>`;
+    }
+    html+=`</div>`;
+  });
+
+  html+=`<div class="nav">
+    <button class="btn-back" onclick="goBack()" ${i===0?'disabled':''}>السابق</button>
+    <div>
+      <button class="btn-skip" onclick="nextQ()">تخطّي</button>
+      <button class="btn-next" onclick="nextQ()">التالي ←</button>
+    </div>
+  </div>`;
+
+  card.innerHTML=html;
+  stage.innerHTML=''; stage.appendChild(card);
+  const ppi=q.parts.findIndex(p=>p.type==='people');
+  if(ppi>-1 && !(state.answers[q.parts[ppi].key]||[]).length) addPerson(gi,ppi);
+  restoreQ(gi);
+  window.scrollTo({top:0});
+}
+
+/* ---------- التقاط الإجابات (بالفهرس العام gi) ---------- */
+function key(gi,pi){ return QUESTIONS[gi].parts[pi].key; }
+
+function pick(gi,pi,oi){
+  const p=QUESTIONS[gi].parts[pi];
+  const val=p.options[oi];
+  const cont=document.getElementById(`p${gi}_${pi}`);
+  const chips=[...cont.querySelectorAll('.chip')].filter(c=>c.dataset.part==pi+'');
+  let arr=state.answers[key(gi,pi)]||[];
+  if(arr.includes(val)) arr=arr.filter(x=>x!==val);
+  else arr=[...arr,val];
+  chips.forEach((c,ci)=>c.classList.toggle('sel', arr.includes(p.options[ci])));
+  setAns(gi, key(gi,pi), arr);
+}
+function pickMatrix(gi,pi,ri,ci){
+  const p=QUESTIONS[gi].parts[pi];
+  const m=state.answers[key(gi,pi)]||{};
+  m[p.rows[ri]]=p.cols[ci];
+  setAns(gi,key(gi,pi),m);
+  const cont=document.getElementById(`p${gi}_${pi}`);
+  cont.querySelectorAll(`[data-row="${ri}"]`).forEach(b=>b.classList.remove('sel'));
+  cont.querySelector(`[data-row="${ri}"][data-col="${ci}"]`).classList.add('sel');
+}
+function textIn(gi,pi){
+  const v=document.getElementById(`txt_p${gi}_${pi}`).value.trim();
+  setAns(gi,key(gi,pi),v,true);
+}
+function toggleInterview(gi,pi){
+  const b=document.getElementById(`iv_p${gi}_${pi}`);
+  const on=!b.classList.contains('sel');
+  b.classList.toggle('sel',on);
+  setAns(gi,key(gi,pi)+'_interview', on?'تُروى في المقابلة':'');
+}
+function addPerson(gi,pi){
+  const box=document.getElementById(`people_p${gi}_${pi}`);
+  if(!box || box.children.length>=8) return;
+  const p=QUESTIONS[gi].parts[pi];
+  const row=document.createElement('div'); row.className='person-row';
+  row.innerHTML=`<input type="text" placeholder="الاسم" oninput="peopleSync(${gi},${pi})">
+    <div class="chips">`+p.roles.map(r=>`<button type="button" class="chip small" onclick="this.classList.toggle('sel');peopleSync(${gi},${pi})">${r}</button>`).join('')+`</div>`;
+  box.appendChild(row);
+}
+function peopleSync(gi,pi){
+  const box=document.getElementById(`people_p${gi}_${pi}`);
+  const list=[...box.querySelectorAll('.person-row')].map(r=>{
+    const name=r.querySelector('input').value.trim();
+    const roles=[...r.querySelectorAll('.chip.sel')].map(c=>c.textContent);
+    return name?{name,roles}:null;
+  }).filter(Boolean);
+  setAns(gi,key(gi,pi),list);
+}
+
+let awardedBase={}, awardedTxt={};
+function setAns(gi,k,v,isText){
+  state.answers[k]=v;
+  const has = Array.isArray(v)?v.length>0 : (typeof v==='object'&&v!==null)?Object.keys(v).length>0 : String(v).length>0;
+  if(has && !isText && !awardedBase[gi]){ awardedBase[gi]=true; updateScore(10); }
+  if(has && isText && !awardedTxt[k]){ awardedTxt[k]=true; updateScore(5); }
+  trySave();
+}
+
+function restoreQ(gi){
+  QUESTIONS[gi].parts.forEach((p,pi)=>{
+    const v=state.answers[p.key];
+    const cont=document.getElementById(`p${gi}_${pi}`); if(!cont) return;
+    if(v!=null){
+      if(p.type==='multi'){
+        const cs=[...cont.querySelectorAll('.chip')].filter(c=>c.dataset.part==pi+'');
+        cs.forEach((c,ci)=>c.classList.toggle('sel', v.includes(p.options[ci])));
+      }
+      if(p.type==='matrix'){
+        p.rows.forEach((r,ri)=>{ const val=v[r]; if(val){const ci=p.cols.indexOf(val);
+          const b=cont.querySelector(`[data-row="${ri}"][data-col="${ci}"]`); b&&b.classList.add('sel');}});
+      }
+      if(p.type==='text'){
+        const t=document.getElementById(`txt_p${gi}_${pi}`); if(t) t.value=v;
+      }
+      if(p.type==='people' && Array.isArray(v)){
+        const box=document.getElementById(`people_p${gi}_${pi}`);
+        box.innerHTML='';
+        v.forEach(person=>{
+          addPerson(gi,pi);
+          const row=box.lastChild;
+          row.querySelector('input').value=person.name;
+          [...row.querySelectorAll('.chip')].forEach(c=>{ if(person.roles.includes(c.textContent)) c.classList.add('sel'); });
+        });
+        addPerson(gi,pi);
+      }
+    }
+    if(p.type==='text' && state.answers[p.key+'_interview']){
+      const b=document.getElementById(`iv_p${gi}_${pi}`); b&&b.classList.add('sel');
+    }
+  });
+}
+
+/* ---------- التنقل ---------- */
+function goBack(){ if(state.qIndex>0){ state.qIndex--; renderJourney(); renderQuestion(); } }
+function nextQ(){
+  const AQ=activeQuestions();
+  const i=state.qIndex;
+  const curLv=AQ[i].lv;
+  const gi=QUESTIONS.indexOf(AQ[i]);
+  if(!state.visited.includes(gi)) state.visited.push(gi);
+  state.qIndex++;
+  const nextLv = state.qIndex<AQ.length ? AQ[state.qIndex].lv : null;
+  trySave();
+  if(nextLv!==curLv){
+    if(!state.completedLevels.includes(curLv)) state.completedLevels.push(curLv);
+    updateScore(50);
+    showLevelDone(curLv, nextLv);
+  }else{ renderJourney(); renderQuestion(); }
+}
+
+function showLevelDone(lvId, nextLv){
+  const lv=LEVELS.find(l=>l.id===lvId);
+  confetti();
+  const ov=document.createElement('div'); ov.className='overlay';
+  const remaining = activeQuestions().length - state.qIndex;
+  ov.innerHTML=`<div class="level-done">
+    <div class="badge-big">${lv.icon}</div>
+    <h2>بارك الله فيكم! نلتم «${lv.badge}»</h2>
+    <div class="bonus-pts">🌿 +٥٠ نقطة أثر</div>
+    <p>${nextLv? 'مجالٌ من الحكاية اكتمل بأيديكم — بقي '+remaining+' سؤالاً في المجالات التي اخترتم.' : 'اكتملت كل المجالات التي اخترتم!'}</p>
+    <button class="btn-main" onclick="closeOverlay(this)">${nextLv?'المجال التالي ←':'عرض الختام 🏆'}</button>
+    ${nextLv?'<div style="margin-top:10px"><button class="btn-skip" onclick="finishNow(this)">أكتفي بما أجبت وأختم الآن</button></div>':''}
+  </div>`;
+  document.body.appendChild(ov);
+}
+function closeOverlay(btn){
+  btn.closest('.overlay').remove();
+  renderJourney();
+  if(state.qIndex>=activeQuestions().length) renderFinal(); else renderQuestion();
+}
+function finishNow(btn){
+  btn.closest('.overlay').remove();
+  state.qIndex=activeQuestions().length;
+  trySave(); renderJourney(); renderFinal();
+}
+
+/* ---------- الختام ---------- */
+function renderFinal(){
+  document.getElementById('qCounter').textContent='الختام';
+  confetti();
+  const earned=LEVELS.filter(l=>state.completedLevels.includes(l.id));
+  const stage=document.getElementById('stage');
+  stage.innerHTML=`<div class="final">
+    <div class="badge-big">🏆</div>
+    <h2>اكتملت رحلة التدوين!</h2>
+    <p>جزاكم الله خيراً ${state.rep.name||'يا قائدنا الكريم'} — إجاباتكم ستحوّل فصول الكتاب من نصٍّ مكتوب إلى حكاية موثقة تنبض بالحياة، ونسأل الله أن يجعلها في موازين حسنات كل من أسهم فيها.</p>
+    <div class="impact" style="display:inline-flex; margin:8px 0;">🌿 ${state.points} نقطة أثر — ${document.getElementById('rank').textContent}</div>
+    <div class="badges-row">${earned.map(l=>`<div class="badge-card"><div class="em">${l.icon}</div><small>${l.badge}</small></div>`).join('')}</div>
+    <p style="font-size:16px; color:var(--ink2)">خطوة أخيرة مهمة: تكرم بتنزيل ملف الإجابات وإرسالها إلى من قام بمشاركتكم الملفّ فالإجابات لا تصلنا تلقائياً.</p>
+    <button class="btn-main" onclick="downloadAnswers()">⬇ تنزيل ملف الإجابات</button>
+    <button class="btn-main" style="background:var(--maroon); color:#fff" onclick="copyAnswers(this)">📋 نسخ الإجابات</button>
+    <div class="export-box" id="exportBox"></div>
+  </div>`;
+  document.getElementById('pbar').style.width='100%';
+  trySave();
+}
+
+function buildExport(){
+  let out=`إجابات مشروع توثيق سردية كفاءات الماجد\n`;
+  out+=`المجيب: ${state.rep.name||'-'} (${state.rep.role||'-'})\n`;
+  out+=`المجالات: ${activeLevels().map(l=>l.name).join('، ')}\n`;
+  out+=`رصيد الأثر: ${state.points} · التاريخ: ${new Date().toLocaleDateString('ar-SA')}\n`;
+  out+='─'.repeat(40)+'\n';
+  activeQuestions().forEach((q)=>{
+    const lv=LEVELS.find(l=>l.id===q.lv);
+    out+=`\n【${lv.name}】${q.title}\n`;
+    q.parts.forEach(p=>{
+      const v=state.answers[p.key];
+      const iv=state.answers[p.key+'_interview'];
+      let label=p.label?p.label+' ':'';
+      if(v==null||(Array.isArray(v)&&!v.length)||(typeof v==='string'&&!v)){
+        if(iv) out+=`  ${label}🎙 ${iv}\n`;
+        return;
+      }
+      if(Array.isArray(v)&&v.length&&typeof v[0]==='object'){
+        v.forEach(person=>out+=`  • ${person.name} — ${person.roles.join('، ')||'دون تحديد'}\n`);
+      }else if(!Array.isArray(v)&&typeof v==='object'){
+        Object.entries(v).forEach(([r,c])=>out+=`  • ${r}: ${c}\n`);
+      }else if(Array.isArray(v)){
+        out+=`  ${label}${v.join(' | ')}\n`;
+      }else{
+        out+=`  ${label}${v}\n`;
+      }
+      if(iv) out+=`  🎙 ${iv}\n`;
+    });
+  });
+  return out;
+}
+function downloadAnswers(){
+  const blob=new Blob(['\ufeff'+buildExport()],{type:'text/plain;charset=utf-8'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  const nm=(state.rep.name||'قائد').replace(/\s+/g,'_');
+  a.download=`إجابات_سردية_كفاءات_${nm}.txt`;
+  a.click();
+  showExport();
+}
+function copyAnswers(btn){
+  const t=buildExport();
+  const ta=document.createElement('textarea'); ta.value=t; document.body.appendChild(ta);
+  ta.select();
+  try{ document.execCommand('copy'); btn.textContent='✓ نُسخت'; }catch(e){ btn.textContent='انسخوا من الصندوق أدناه'; }
+  document.body.removeChild(ta);
+  showExport();
+}
+function showExport(){
+  const b=document.getElementById('exportBox');
+  b.style.display='block'; b.textContent=buildExport();
+}
+
+/* ---------- كونفيتي ---------- */
+function confetti(){
+  if(window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const glyphs=['🪶','✦','◆','🌿','✧'];
+  for(let k=0;k<26;k++){
+    const s=document.createElement('div');
+    s.className='confetti';
+    s.textContent=glyphs[k%glyphs.length];
+    s.style.left=Math.random()*100+'vw';
+    s.style.color=['#7A1F1F','#A8802F','#B4661F','#3E6B3A'][k%4];
+    s.style.animationDuration=(2.2+Math.random()*1.8)+'s';
+    s.style.fontSize=(14+Math.random()*16)+'px';
+    document.body.appendChild(s);
+    setTimeout(()=>s.remove(),4200);
+  }
+}
+</script>
+</body>
+</html>
