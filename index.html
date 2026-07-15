@@ -1021,15 +1021,55 @@ function buildExport(){
   });
   return out;
 }
-function downloadAnswers(){
-  const blob=new Blob(['\ufeff'+buildExport()],{type:'text/plain;charset=utf-8'});
-  const a=document.createElement('a');
-  a.href=URL.createObjectURL(blob);
-  const nm=(state.rep.name||'قائد').replace(/\s+/g,'_');
-  a.download=`إجابات_سردية_كفاءات_${nm}.txt`;
-  a.click();
-  showExport();
+
+async function downloadAnswers(){
+  // محاولة تحديد الزر النشط لتغيير حالته أثناء الإرسال
+  const activeBtn = document.activeElement || { textContent: '' };
+  const originalText = activeBtn.textContent;
+  activeBtn.textContent = 'جاري إرسال الإجابات تلقائياً... ⏳';
+  
+  // رابط الـ Web App الخاص بجوجل
+  const googleScriptURL = 'https://script.google.com/macros/s/AKfycbwWhu0rrjY-bzmQtOHiLkLm1j0OG-D-xDkhNdD8vdhoIvICA7dYq496YQv3xq9oqwF7/exec'; 
+  
+  const payload = {
+    name: state.rep.name || 'قائد غير معروف',
+    answers: buildExport()
+  };
+
+  try {
+    // محاولة إرسال البيانات إلى جدول جوجل
+    await fetch(googleScriptURL, {
+      method: 'POST',
+      mode: 'no-cors', // لتفادي قيود الـ CORS في المتصفحات المختلفة
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+
+    // في حال نجاح الإرسال
+    activeBtn.textContent = '✓ تم الإرسال بنجاح! شكراً لك';
+    if(activeBtn.style) {
+      activeBtn.style.backgroundColor = '#3E6B3A'; // تغيير لون الزر للأخضر
+    }
+    showExport();
+
+  } catch (error) {
+    // في حال حدوث أي خطأ بالإنترنت، نقوم بالتحميل اليدوي فوراً كخطة بديلة لحفظ البيانات
+    console.error('فشل الإرسال التلقائي، جاري التحميل احتياطياً:', error);
+    activeBtn.textContent = 'فشل الإرسال التلقائي، يتم التحميل يدوياً...';
+    
+    setTimeout(() => {
+      const blob = new Blob(['\ufeff' + buildExport()], {type: 'text/plain;charset=utf-8'});
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      const nm = (state.rep.name || 'قائد').replace(/\s+/g, '_');
+      a.download = `إجابات_سردية_كفاءات_${nm}.txt`;
+      a.click();
+      showExport();
+      activeBtn.textContent = originalText;
+    }, 1500);
+  }
 }
+
 function copyAnswers(btn){
   const t=buildExport();
   const ta=document.createElement('textarea'); ta.value=t; document.body.appendChild(ta);
@@ -1037,6 +1077,11 @@ function copyAnswers(btn){
   try{ document.execCommand('copy'); btn.textContent='✓ نُسخت'; }catch(e){ btn.textContent='انسخوا من الصندوق أدناه'; }
   document.body.removeChild(ta);
   showExport();
+}
+
+function showExport(){
+  const b=document.getElementById('exportBox');
+  b.style.display='block'; b.textContent=buildExport();
 }
 function showExport(){
   const b=document.getElementById('exportBox');
